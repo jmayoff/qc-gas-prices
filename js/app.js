@@ -15,7 +15,7 @@ document.getElementById("load").onclick = async () => {
     return;
   }
 
-  // --- STEP 1: Inspect the structure ---
+  // --- STEP 1: Inspect structure ---
   const firstRow = rows[0];
   const columnNames = Object.keys(firstRow);
 
@@ -23,7 +23,19 @@ document.getElementById("load").onclick = async () => {
   console.log("First row:", firstRow);
   console.table(rows.slice(0, 5));
 
-  // Show column names on the page
   document.getElementById("output").textContent =
     "Column names:\n" + columnNames.join("\n");
+
+  // --- STEP 2: Extract numeric regular gasoline price ---
+  const cleaned = rows.map(row => {
+    const raw = row["Prix Régulier"]; // e.g. "190.9¢"
+    const numeric = parseFloat(raw.replace("¢", "")); // → 190.9
+
+    return {
+      ...row,
+      regularPrice: numeric
+    };
+  });
+
+  console.log("Sample with numeric price:", cleaned[0]);
 };
