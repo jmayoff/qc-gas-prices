@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Quebec Gas Prices</title>
+</head>
+<body>
+  <h1>Quebec Gas Prices</h1>
+  <p>If you see this, GitHub Pages works.</p>
+
+  <button id="load">Load prices</button>
+  <pre id="output"></pre>
+
+  <script>
+    document.getElementById("load").onclick = async () => {
+      const res = await fetch("https://regieessencequebec.ca/...");
+      const text = await res.text();
+      document.getElementById("output").textContent =
+        text.slice(0, 2000);
+    };
+  </script>
+</body>
+</html>
