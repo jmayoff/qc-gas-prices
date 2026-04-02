@@ -26,16 +26,19 @@ document.getElementById("load").onclick = async () => {
   document.getElementById("output").textContent =
     "Column names:\n" + columnNames.join("\n");
 
-  // --- STEP 2: Extract numeric regular gasoline price ---
-  const cleaned = rows.map(row => {
-    const raw = row["Prix Régulier"]; // e.g. "190.9¢"
-    const numeric = parseFloat(raw.replace("¢", "")); // → 190.9
+  // --- STEP 2: Extract numeric regular gasoline price safely ---
+  const cleaned = rows
+    .filter(row => row["Prix Régulier"]) // skip blank/malformed rows
+    .map(row => {
+      const raw = row["Prix Régulier"]; // e.g. "190.9¢"
+      const numeric = parseFloat(raw.replace("¢", "")); // → 190.9
 
-    return {
-      ...row,
-      regularPrice: numeric
-    };
-  });
+      return {
+        ...row,
+        regularPrice: numeric
+      };
+    });
 
-  console.log("Sample with numeric price:", cleaned[0]);
+  console.log("Cleaned row sample:", cleaned[0]);
+  console.log("Cleaned count:", cleaned.length);
 };
