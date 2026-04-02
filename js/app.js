@@ -8,9 +8,22 @@ document.getElementById("load").onclick = async () => {
 
   const rows = XLSX.utils.sheet_to_json(sheet);
 
-  console.log("Rows:", rows);
   console.log("Row count:", rows.length);
 
+  if (rows.length === 0) {
+    document.getElementById("output").textContent = "No rows found.";
+    return;
+  }
+
+  // --- STEP 1: Inspect the structure ---
+  const firstRow = rows[0];
+  const columnNames = Object.keys(firstRow);
+
+  console.log("Column names:", columnNames);
+  console.log("First row:", firstRow);
+  console.table(rows.slice(0, 5));
+
+  // Show column names on the page
   document.getElementById("output").textContent =
-    "Parsed " + rows.length + " rows";
+    "Column names:\n" + columnNames.join("\n");
 };
