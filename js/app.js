@@ -1,5 +1,5 @@
 document.getElementById("load").onclick = async () => {
-  const res = await fetch("PASTE_XLSX_URL_HERE");
+  const res = await fetch("https://regieessencequebec.ca/data/stations-20260402215005.xlsx");
   const buf = await res.arrayBuffer();
 
   const workbook = XLSX.read(buf, { type: "array" });
