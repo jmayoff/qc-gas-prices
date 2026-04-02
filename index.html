@@ -12,15 +12,6 @@
   <pre id="output"></pre>
 
   
-<script>
-  document.getElementById("load").onclick = async () => {
-    const res = await fetch("https://regieessencequebec.ca/");
-    const text = await res.text();
-    console.log(text);
-    document.getElementById("output").textContent =
-      "Fetched " + text.length + " characters";
-  };
-</script>
 
     <script src="js/app.js"></script>
 </body>
