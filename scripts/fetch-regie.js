@@ -4,24 +4,24 @@ import fetch from "node-fetch";
 import fs from "fs";
 import path from "path";
 
-const PAGE_URL = "https://www.regie-energie.qc.ca/energie/essence/index.html";
+const PAGE_URL = "https://regiesessencequebec.ca/";
 const OUTPUT_PATH = path.join("data", "latest.xlsx");
 
 async function run() {
   try {
-    console.log("Fetching Régie page…");
+    console.log("Fetching new Régie page…");
     const pageRes = await fetch(PAGE_URL);
     const html = await pageRes.text();
 
-    // Find the XLSX filename: stations-XXXXXXXXXXXXXX.xlsx
+    // Find stations-XXXXXXXXXXXXXX.xlsx
     const match = html.match(/stations-[0-9]+\.xlsx/);
-    
+
     if (!match) {
-      console.error("❌ Could not find XLSX link on the page.");
+      console.error("❌ Could not find XLSX link on the new page.");
       process.exit(1);
     }
-    
-    const xlsxUrl = new URL(match[0], PAGE_URL).href;
+
+    const xlsxUrl = new URL(`/data/${match[0]}`, PAGE_URL).href;
     console.log("Found XLSX:", xlsxUrl);
 
     console.log("Downloading XLSX…");
@@ -33,8 +33,8 @@ async function run() {
     }
 
     const buffer = Buffer.from(await fileRes.arrayBuffer());
-
     fs.writeFileSync(OUTPUT_PATH, buffer);
+
     console.log("✅ Saved XLSX to", OUTPUT_PATH);
 
   } catch (err) {
