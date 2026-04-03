@@ -41,4 +41,23 @@ document.getElementById("load").onclick = async () => {
 
   console.log("Cleaned row sample:", cleaned[0]);
   console.log("Cleaned count:", cleaned.length);
+
+  // --- STEP 3: Compute averages ---
+
+// 3A: Average for all of Québec
+const totalQC = cleaned.reduce((sum, row) => sum + row.regularPrice, 0);
+const avgQC = totalQC / cleaned.length;
+
+// 3B: Average for Montréal region only
+const montrealRows = cleaned.filter(row => row["Région"] === "Montréal");
+
+let avgMontreal = null;
+if (montrealRows.length > 0) {
+  const totalMTL = montrealRows.reduce((sum, row) => sum + row.regularPrice, 0);
+  avgMontreal = totalMTL / montrealRows.length;
+}
+
+console.log("Average QC:", avgQC);
+console.log("Average Montréal:", avgMontreal);
+
 };
