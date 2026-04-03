@@ -2,8 +2,8 @@ name: Fetch Régie XLSX
 
 on:
   schedule:
-    - cron: "0 10 * * *"   # Runs every day at 6 AM Montréal time (EDT)
-  workflow_dispatch:        # Allows manual runs
+    - cron: "0 10 * * *"   # 6 AM Montréal time
+  workflow_dispatch:        
 
 jobs:
   fetch:
@@ -21,16 +21,14 @@ jobs:
       - name: Install dependencies
         run: npm install node-fetch@3
 
-      - name: Ensure data folder exists
-        run: mkdir -p data
-
       - name: Run fetch script
         run: node scripts/fetch-regie.js
 
       - name: Commit updated XLSX
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add data/latest.xlsx
-          git commit -m "Update Régie XLSX" || echo "No changes to commit"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # CHANGED: Now adding the specific file from the root
+          git add gas-prices.xlsx
+          git commit -m "Update gas-prices.xlsx [automated]" || echo "No changes to commit"
           git push
