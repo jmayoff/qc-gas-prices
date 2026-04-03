@@ -27,6 +27,23 @@ document.getElementById("load").onclick = async () => {
       regularPrice: parseFloat(row["Prix Régulier"].replace("¢", ""))
     }));
 
+function extractDateFromFilename(filename) {
+  const match = filename.match(/(\d{14})/); // 14 digits
+  if (!match) return null;
+
+  const ts = match[1];
+  const year = ts.substring(0, 4);
+  const month = ts.substring(4, 6);
+  const day = ts.substring(6, 8);
+  const hour = ts.substring(8, 10);
+  const min = ts.substring(10, 12);
+  const sec = ts.substring(12, 14);
+
+  return new Date(`${year}-${month}-${day}T${hour}:${min}:${sec}`);
+}
+
+  
+
   // Québec average
   const totalQC = cleaned.reduce((sum, r) => sum + r.regularPrice, 0);
   const avgQC = totalQC / cleaned.length;
