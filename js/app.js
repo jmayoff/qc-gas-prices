@@ -58,13 +58,12 @@ async function loadFile() {
 let fileDate = extractDateFromFilename(file.name);
 
 if (!fileDate) {
-  fileDate = new Date(file.lastModified);
+  fileDate = new Date(file.lastModified); // this is already local, but fine as fallback
 }
 
-// Convert to Montreal time (DST handled automatically)
 const montrealTime = fileDate.toLocaleString("en-CA", {
   timeZone: "America/Toronto",
-  hour12: false,
+  hour12: true,
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
@@ -75,6 +74,7 @@ const montrealTime = fileDate.toLocaleString("en-CA", {
 
 document.getElementById("lastUpdated").textContent =
   "Data last updated: " + montrealTime;
+
 
 
   // ------------------------------
