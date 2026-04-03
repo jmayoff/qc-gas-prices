@@ -66,4 +66,24 @@ out.textContent +=
   "\n\nAverage Québec: " + avgQC.toFixed(1) + "¢" +
   "\nAverage Montréal: " + (avgMontreal ? avgMontreal.toFixed(1) + "¢" : "N/A");
 
+// --- STEP 4: Greater Montréal Area (Montréal + Laval + Montérégie) ---
+const gmaRows = cleaned.filter(row =>
+  row["Région"] === "Montréal" ||
+  row["Région"] === "Laval" ||
+  row["Région"] === "Montérégie"
+);
+
+let avgGMA = null;
+if (gmaRows.length > 0) {
+  const totalGMA = gmaRows.reduce((sum, row) => sum + row.regularPrice, 0);
+  avgGMA = totalGMA / gmaRows.length;
+}
+
+console.log("Average GMA:", avgGMA);
+
+out.textContent +=
+  "\nAverage Greater Montréal Area: " +
+  (avgGMA ? avgGMA.toFixed(1) + "¢" : "N/A");
+
+  
 };
