@@ -8,15 +8,17 @@ function extractDateFromFilename(filename) {
   if (!match) return null;
 
   const ts = match[1];
-  const year = ts.substring(0, 4);
-  const month = ts.substring(4, 6);
-  const day = ts.substring(6, 8);
-  const hour = ts.substring(8, 10);
-  const min = ts.substring(10, 12);
-  const sec = ts.substring(12, 14);
+  const year = parseInt(ts.substring(0, 4), 10);
+  const month = parseInt(ts.substring(4, 6), 10) - 1; // 0-based
+  const day = parseInt(ts.substring(6, 8), 10);
+  const hour = parseInt(ts.substring(8, 10), 10);
+  const min = parseInt(ts.substring(10, 12), 10);
+  const sec = parseInt(ts.substring(12, 14), 10);
 
-  return new Date(`${year}-${month}-${day}T${hour}:${min}:${sec}`);
+  // Interpret timestamp as UTC
+  return new Date(Date.UTC(year, month, day, hour, min, sec));
 }
+
 
 
 // ------------------------------
