@@ -11,7 +11,14 @@ const OUTPUT_PATH = path.join("data", "latest.geojson");
 async function run() {
   try {
     console.log("Fetching stations.geojson.gz…");
-    const res = await fetch(GEOJSON_URL);
+
+    const res = await fetch(GEOJSON_URL, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Referer": "https://regieessencequebec.ca/",
+        "Accept-Encoding": "gzip"
+      }
+    });
 
     if (!res.ok) {
       console.error("❌ Failed to fetch GeoJSON:", res.status, res.statusText);
