@@ -10,8 +10,10 @@ document.getElementById("uploadForm").addEventListener("submit", async (e) => {
   }
 
   const file = fileInput.files[0];
-  status.textContent = "Processing...";
+  const originalName = file.name; // Captures "stations-20260403224505.xlsx"
+  status.textContent = "Processing " + originalName + "...";
 
+  // Helper function to convert file to Base64
   const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -21,25 +23,24 @@ document.getElementById("uploadForm").addEventListener("submit", async (e) => {
 
   try {
     const base64 = await toBase64(file);
-    status.textContent = "Uploading directly to repository...";
+    status.textContent = "Uploading to GitHub...";
 
-    // We are now sending the file to the "data" folder (or root) as gas-prices.xlsx
-    // Change "gas-prices.xlsx" below to whatever you want the file to be named
-    const fileName = "gas-prices.xlsx"; 
-    const url = `https://api.github.com/repos/jmayoff/qc-gas-prices/contents/${fileName}`;
+    // We always save it as gas-prices.xlsx so app.js knows where to look
+    const targetName = "gas-prices.xlsx"; 
+    const url = `https://api.github.com/repos/jmayoff/qc-gas-prices/contents/${targetName}`;
 
-    // First, we try to see if the file already exists to get its "sha" (unique ID)
-    // This is required by GitHub to overwrite an existing file.
+    // 1. Check if the file already exists to get its 'sha' (required for overwriting)
     let sha = "";
     const getRes = await fetch(url, {
         headers: { "Authorization": "Bearer __UPLOAD_TOKEN__" }
     });
+    
     if (getRes.ok) {
         const fileData = await getRes.json();
         sha = fileData.sha;
     }
 
-    // Now we "Commit" the file
+    // 2. Perform the "Direct Commit" upload
     const res = await fetch(url, {
       method: "PUT",
       headers: {
@@ -47,21 +48,23 @@ document.getElementById("uploadForm").addEventListener("submit", async (e) => {
         "Authorization": "Bearer __UPLOAD_TOKEN__",
       },
       body: JSON.stringify({
-        message: `Update ${fileName} via web uploader`,
+        // We include the original filename in the message for your records
+        message: `Manual Upload: ${originalName}`,
         content: base64,
-        sha: sha // Include the sha if the file exists, otherwise it's a new file
+        sha: sha // Only included if the file already existed
       })
     });
 
     if (res.ok) {
-      status.textContent = "Upload successful! File updated in repository.";
+      status.textContent = "Success! Dashboard will update in ~60 seconds.";
+      fileInput.value = ""; // Clear the input
     } else {
       const errorData = await res.json();
       console.error("GitHub API Error:", errorData);
-      status.textContent = "Upload failed: " + (errorData.message || "Error");
+      status.textContent = "Upload failed: " + (errorData.message || "Unknown error");
     }
   } catch (err) {
-    console.error("Process Error:", err);
-    status.textContent = "An error occurred.";
+    console.error("Upload Process Error:", err);
+    status.textContent = "An error occurred during the upload process.";
   }
 });
