@@ -59,5 +59,11 @@ if (montrealRows.length > 0) {
 
 console.log("Average QC:", avgQC);
 console.log("Average Montréal:", avgMontreal);
+const out = document.getElementById("output");
+  
+  // Display on website
+out.textContent +=
+  "\n\nAverage Québec: " + avgQC.toFixed(1) + "¢" +
+  "\nAverage Montréal: " + (avgMontreal ? avgMontreal.toFixed(1) + "¢" : "N/A");
 
 };
