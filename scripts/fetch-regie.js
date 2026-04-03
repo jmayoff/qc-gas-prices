@@ -1,3 +1,5 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 import fetch from "node-fetch";
 import fs from "fs";
 import path from "path";
@@ -11,7 +13,6 @@ async function run() {
     const pageRes = await fetch(PAGE_URL);
     const html = await pageRes.text();
 
-    // Find the XLSX link: stations-XXXXXXXXXXXXXX.xlsx
     const match = html.match(/href="([^"]*stations-[0-9]+\.xlsx)"/i);
 
     if (!match) {
@@ -42,4 +43,3 @@ async function run() {
 }
 
 run();
-
