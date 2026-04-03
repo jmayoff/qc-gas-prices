@@ -2,22 +2,29 @@ console.log("app.js loaded");
 
 
 // ------------------------------
-// Extract timestamp from filename
+// Determine timestamp
 // ------------------------------
-function extractDateFromFilename(filename) {
-  const match = filename.match(/(\d{14})/); // e.g. 20260402233505
-  if (!match) return null;
+let fileDate = extractDateFromFilename(file.name);
 
-  const ts = match[1];
-  const year = ts.substring(0, 4);
-  const month = ts.substring(4, 6);
-  const day = ts.substring(6, 8);
-  const hour = ts.substring(8, 10);
-  const min = ts.substring(10, 12);
-  const sec = ts.substring(12, 14);
-
-  return new Date(`${year}-${month}-${day}T${hour}:${min}:${sec}`);
+if (!fileDate) {
+  fileDate = new Date(file.lastModified);
 }
+
+// Convert to Montreal time (DST handled automatically)
+const montrealTime = fileDate.toLocaleString("en-CA", {
+  timeZone: "America/Toronto",
+  hour12: false,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit"
+});
+
+document.getElementById("lastUpdated").textContent =
+  "Data last updated: " + montrealTime;
+
 
 // ------------------------------
 // Attach handler AFTER DOM loads
