@@ -31,6 +31,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+
+    # REQUIRED BY GITHUB PAGES
+    concurrency:
+      group: "pages"
+      cancel-in-progress: true
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
