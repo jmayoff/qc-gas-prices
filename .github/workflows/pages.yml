@@ -12,35 +12,55 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Inject upload token
-        run: |
-          sed -i "s/__UPLOAD_TOKEN__/${UPLOAD_XLSX_TOKEN}/" upload.js
+      - name: Verify and Inject Token
+        shell: bash
         env:
           UPLOAD_XLSX_TOKEN: ${{ secrets.UPLOAD_XLSX_TOKEN }}
+        run: |
+          # 1. Check if the file exists at the root
+          if [ ! -f "upload.js" ]; then
+            echo "ERROR: upload.js not found in the root directory!"
+            exit 1
+          fi
+
+          # 2. Check if the placeholder actually exists in the file
+          if ! grep -q "__UPLOAD_TOKEN__" upload.js; then
+            echo "ERROR: Placeholder __UPLOAD_TOKEN__ not found in upload.js."
+            echo "Perhaps it was already replaced or is misspelled?"
+            exit 1
+          fi
+
+          # 3. Perform the replacement 
+          # Using '|' as a delimiter in case your token contains slashes '/'
+          sed -i "s|__UPLOAD_TOKEN__|${UPLOAD_XLSX_TOKEN}|g" upload.js
+
+          # 4. Final verification: If the placeholder is still there, something is wrong
+          if grep -q "__UPLOAD_TOKEN__" upload.js; then
+            echo "ERROR: sed command ran but the placeholder is still present!"
+            exit 1
+          else
+            echo "SUCCESS: Token successfully injected into upload.js."
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          # This ensures we grab the modified files from the current folder
+          path: "."
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-
-    # REQUIRED BY GITHUB PAGES
     concurrency:
       group: "pages"
       cancel-in-progress: true
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
