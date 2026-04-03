@@ -19,28 +19,11 @@ function extractDateFromFilename(filename) {
   return new Date(Date.UTC(year, month, day, hour, min, sec));
 }
 
-
-
-// ------------------------------
-// Attach handler AFTER DOM loads
-// ------------------------------
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM ready — attaching Load File handler");
-
-  const loadBtn = document.getElementById("load");
-  if (!loadBtn) {
-    console.error("ERROR: Button #load not found in HTML");
-    return;
-  }
-
-  loadBtn.addEventListener("click", loadFile);
-});
-
 // ------------------------------
 // Main file loader
 // ------------------------------
 async function loadFile() {
-  console.log("Load File button clicked!");
+  console.log("Load File triggered!");
 
   const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
@@ -52,29 +35,27 @@ async function loadFile() {
 
   console.log("File selected:", file.name);
 
-// ------------------------------
-// Determine timestamp
-// ------------------------------
-let fileDate = extractDateFromFilename(file.name);
+  // ------------------------------
+  // Determine timestamp
+  // ------------------------------
+  let fileDate = extractDateFromFilename(file.name);
 
-if (!fileDate) {
-  fileDate = new Date(file.lastModified); // this is already local, but fine as fallback
-}
+  if (!fileDate) {
+    fileDate = new Date(file.lastModified);
+  }
 
-const montrealTime = fileDate.toLocaleString("en-CA", {
-  timeZone: "America/Toronto",
-  hour12: true,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "numeric",
-  minute: "2-digit"
-});
+  const montrealTime = fileDate.toLocaleString("en-CA", {
+    timeZone: "America/Toronto",
+    hour12: true,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "2-digit"
+  });
 
-document.getElementById("lastUpdated").textContent =
-  "Data last updated: " + montrealTime;
-
-
+  document.getElementById("lastUpdated").textContent =
+    "Data last updated: " + montrealTime;
 
   // ------------------------------
   // Read uploaded XLSX file
@@ -99,75 +80,4 @@ document.getElementById("lastUpdated").textContent =
     .filter(row => row["Prix Régulier"])
     .map(row => ({
       ...row,
-      regularPrice: parseFloat(row["Prix Régulier"].replace("¢", ""))
-    }));
-
-  // ------------------------------
-  // Québec average
-  // ------------------------------
-  const totalQC = cleaned.reduce((sum, r) => sum + r.regularPrice, 0);
-  const avgQC = totalQC / cleaned.length;
-  document.getElementById("avgQC").textContent = avgQC.toFixed(1) + "¢";
-
-  // ------------------------------
-  // Montréal average
-  // ------------------------------
-  const montrealRows = cleaned.filter(r => r["Région"] === "Montréal");
-  const avgMTL =
-    montrealRows.reduce((s, r) => s + r.regularPrice, 0) / montrealRows.length;
-  document.getElementById("avgMTL").textContent = avgMTL.toFixed(1) + "¢";
-
-  // ------------------------------
-  // Laval average
-  // ------------------------------
-  const lavalRows = cleaned.filter(r => r["Région"] === "Laval");
-  const avgLaval =
-    lavalRows.reduce((s, r) => s + r.regularPrice, 0) / lavalRows.length;
-  document.getElementById("avgLaval").textContent = avgLaval.toFixed(1) + "¢";
-
-  // ------------------------------
-  // Montérégie average
-  // ------------------------------
-  const monteregieRows = cleaned.filter(r => r["Région"] === "Montérégie");
-  const avgMonteregie =
-    monteregieRows.reduce((s, r) => s + r.regularPrice, 0) /
-    monteregieRows.length;
-  document.getElementById("avgMonteregie").textContent =
-    avgMonteregie.toFixed(1) + "¢";
-
-  // ------------------------------
-  // Greater Montréal Area (MTL + Laval + Montérégie)
-  // ------------------------------
-  const gmaRows = cleaned.filter(
-    r =>
-      r["Région"] === "Montréal" ||
-      r["Région"] === "Laval" ||
-      r["Région"] === "Montérégie"
-  );
-
-  const avgGMA =
-    gmaRows.reduce((s, r) => s + r.regularPrice, 0) / gmaRows.length;
-  document.getElementById("avgGMA").textContent = avgGMA.toFixed(1) + "¢";
-
-  // ------------------------------
-  // Lowest 5 Montréal
-  // ------------------------------
-  const sortedMTL = [...montrealRows].sort(
-    (a, b) => a.regularPrice - b.regularPrice
-  );
-
-  const lowest5 = sortedMTL.slice(0, 5);
-  document.getElementById("lowest5").textContent = lowest5
-    .map(r => `${r.regularPrice}¢ — ${r.Bannière} — ${r.Adresse}`)
-    .join("\n");
-
-  // ------------------------------
-  // Highest 5 Montréal
-  // ------------------------------
-  const highest5 = sortedMTL.slice(-5);
-  document.getElementById("highest5").textContent = highest5
-    .map(r => `${r.regularPrice}¢ — ${r.Bannière} — ${r.Adresse}`)
-    .join("\n");
-
-  console.log("Dashboard updated successfully.");
-}
+      regularPrice: parseFloat(row["Prix Rég
