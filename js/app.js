@@ -2,6 +2,17 @@ document.getElementById("load").onclick = async () => {
   const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
 
+  // Determine timestamp
+let fileDate = extractDateFromFilename(file.name);
+
+if (!fileDate) {
+  fileDate = new Date(file.lastModified);
+}
+
+document.getElementById("lastUpdated").textContent =
+  "Data last updated: " + fileDate.toLocaleString();
+
+
   if (!file) {
     alert("Please select an XLSX file first.");
     return;
