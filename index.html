@@ -11,10 +11,13 @@
   <p id="lastUpdated" class="timestamp">No data loaded yet</p>
 
   <!-- File Upload -->
-  <div class="upload-box">
-    <input type="file" id="fileInput" accept=".xlsx">
-    <button id="load">Load File</button>
-  </div>
+  <form id="uploadForm">
+  <input type="file" id="fileInput" accept=".xlsx" required />
+  <button type="submit">Upload XLSX</button>
+</form>
+
+<div id="status"></div>
+
 
   <!-- Dashboard -->
   <div class="dashboard">
@@ -40,6 +43,42 @@
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <script src="js/app.js"></script>
+
+  <script>
+document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const fileInput = document.getElementById("fileInput");
+  const status = document.getElementById("status");
+
+  if (!fileInput.files.length) {
+    status.textContent = "Please select a file.";
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const arrayBuffer = await file.arrayBuffer();
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+
+  status.textContent = "Uploading…";
+
+  const res = await fetch("https://api.github.com/repos/jmayoff/qc-gas-prices/dispatches", {
+    method: "POST",
+    headers: {
+      "Accept": "application/vnd.github+json",
+      "Authorization": "Bearer {{ secrets.UPLOAD_XLSX_TOKEN }}",
+    },
+    body: JSON.stringify({
+      event_type: "upload-xlsx",
+      client_payload: {
+        file: base64
+      }
+    })
+  });
+
+  status.textContent = res.ok ? "Upload successful!" : "Upload failed.";
+});
+</script>
 
 </body>
 </html>
