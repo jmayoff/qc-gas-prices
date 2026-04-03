@@ -4,7 +4,8 @@ import fetch from "node-fetch";
 import fs from "fs";
 import path from "path";
 
-const PAGE_URL = "https://regiesessencequebec.ca/";
+const PAGE_URL = "https://regieessencequebec.ca/";
+
 const OUTPUT_PATH = path.join("data", "latest.xlsx");
 
 async function run() {
