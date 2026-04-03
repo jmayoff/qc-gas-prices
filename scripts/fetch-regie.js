@@ -13,14 +13,15 @@ async function run() {
     const pageRes = await fetch(PAGE_URL);
     const html = await pageRes.text();
 
-    const match = html.match(/href="([^"]*stations-[0-9]+\.xlsx)"/i);
-
+    // Find the XLSX filename: stations-XXXXXXXXXXXXXX.xlsx
+    const match = html.match(/stations-[0-9]+\.xlsx/);
+    
     if (!match) {
       console.error("❌ Could not find XLSX link on the page.");
       process.exit(1);
     }
-
-    const xlsxUrl = new URL(match[1], PAGE_URL).href;
+    
+    const xlsxUrl = new URL(match[0], PAGE_URL).href;
     console.log("Found XLSX:", xlsxUrl);
 
     console.log("Downloading XLSX…");
