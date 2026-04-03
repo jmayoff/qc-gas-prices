@@ -23,8 +23,7 @@ document.getElementById("load").onclick = async () => {
   console.log("First row:", firstRow);
   console.table(rows.slice(0, 5));
 
-  //document.getElementById("output").textContent =
-  //  "Column names:\n" + columnNames.join("\n");
+
 
   // --- STEP 2: Extract numeric regular gasoline price safely ---
   const cleaned = rows
