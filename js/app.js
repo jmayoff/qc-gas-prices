@@ -1,3 +1,6 @@
+console.log("app.js loaded");
+
+
 // ------------------------------
 // Extract timestamp from filename
 // ------------------------------
