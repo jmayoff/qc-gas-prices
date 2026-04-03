@@ -17,16 +17,26 @@ function extractDateFromFilename(filename) {
 }
 
 // ------------------------------
-// Wait for DOM, then attach handler
+// Attach handler AFTER DOM loads
 // ------------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("load").onclick = loadFile;
+  console.log("DOM ready — attaching Load File handler");
+
+  const loadBtn = document.getElementById("load");
+  if (!loadBtn) {
+    console.error("ERROR: Button #load not found in HTML");
+    return;
+  }
+
+  loadBtn.addEventListener("click", loadFile);
 });
 
 // ------------------------------
 // Main file loader
 // ------------------------------
 async function loadFile() {
+  console.log("Load File button clicked!");
+
   const fileInput = document.getElementById("fileInput");
   const file = fileInput.files[0];
 
@@ -34,6 +44,8 @@ async function loadFile() {
     alert("Please select an XLSX file first.");
     return;
   }
+
+  console.log("File selected:", file.name);
 
   // ------------------------------
   // Determine timestamp
@@ -55,6 +67,8 @@ async function loadFile() {
   const firstSheet = workbook.SheetNames[0];
   const sheet = workbook.Sheets[firstSheet];
   const rows = XLSX.utils.sheet_to_json(sheet);
+
+  console.log("Rows loaded:", rows.length);
 
   if (rows.length === 0) {
     alert("No rows found in file.");
@@ -137,4 +151,6 @@ async function loadFile() {
   document.getElementById("highest5").textContent = highest5
     .map(r => `${r.regularPrice}¢ — ${r.Bannière} — ${r.Adresse}`)
     .join("\n");
+
+  console.log("Dashboard updated successfully.");
 }
