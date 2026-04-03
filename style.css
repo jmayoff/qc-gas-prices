@@ -1,0 +1,41 @@
+.dashboard {
+  max-width: 800px;
+  margin: 40px auto;
+  font-family: system-ui, sans-serif;
+  color: #222;
+}
+
+.cards {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  flex: 1;
+  background: #f7f7f7;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #444;
+}
+
+.card p {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 10px 0 0;
+}
+
+pre {
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+}
