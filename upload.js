@@ -10,49 +10,58 @@ document.getElementById("uploadForm").addEventListener("submit", async (e) => {
   }
 
   const file = fileInput.files[0];
-  status.textContent = "Preparing file...";
+  status.textContent = "Processing...";
 
-  // This helper function converts the file to Base64 safely
   const toBase64 = file => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => {
-      // The result looks like "data:application/vnd.ms-excel;base64,XXXX..."
-      // We only want the part after the comma
-      const base64String = reader.result.split(',')[1];
-      resolve(base64String);
-    };
+    reader.onload = () => resolve(reader.result.split(',')[1]);
     reader.onerror = error => reject(error);
   });
 
   try {
     const base64 = await toBase64(file);
-    status.textContent = "Uploading to GitHub...";
+    status.textContent = "Uploading directly to repository...";
 
-    const res = await fetch("https://api.github.com/repos/jmayoff/qc-gas-prices/dispatches", {
-      method: "POST",
+    // We are now sending the file to the "data" folder (or root) as gas-prices.xlsx
+    // Change "gas-prices.xlsx" below to whatever you want the file to be named
+    const fileName = "gas-prices.xlsx"; 
+    const url = `https://api.github.com/repos/jmayoff/qc-gas-prices/contents/${fileName}`;
+
+    // First, we try to see if the file already exists to get its "sha" (unique ID)
+    // This is required by GitHub to overwrite an existing file.
+    let sha = "";
+    const getRes = await fetch(url, {
+        headers: { "Authorization": "Bearer __UPLOAD_TOKEN__" }
+    });
+    if (getRes.ok) {
+        const fileData = await getRes.json();
+        sha = fileData.sha;
+    }
+
+    // Now we "Commit" the file
+    const res = await fetch(url, {
+      method: "PUT",
       headers: {
         "Accept": "application/vnd.github+json",
         "Authorization": "Bearer __UPLOAD_TOKEN__",
       },
       body: JSON.stringify({
-        event_type: "upload-xlsx",
-        client_payload: {
-          file: base64,
-          filename: file.name
-        }
+        message: `Update ${fileName} via web uploader`,
+        content: base64,
+        sha: sha // Include the sha if the file exists, otherwise it's a new file
       })
     });
 
     if (res.ok) {
-      status.textContent = "Upload successful!";
+      status.textContent = "Upload successful! File updated in repository.";
     } else {
-      const errorResponse = await res.json();
-      console.error("GitHub API Error:", errorResponse);
-      status.textContent = "Upload failed: " + (errorResponse.message || "Check console");
+      const errorData = await res.json();
+      console.error("GitHub API Error:", errorData);
+      status.textContent = "Upload failed: " + (errorData.message || "Error");
     }
   } catch (err) {
-    console.error("Local Process Error:", err);
-    status.textContent = "An error occurred during the upload process.";
+    console.error("Process Error:", err);
+    status.textContent = "An error occurred.";
   }
 });
