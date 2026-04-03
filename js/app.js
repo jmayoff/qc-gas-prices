@@ -1,127 +1,82 @@
 console.log("app.js loaded");
 
-// ------------------------------
-// Extract timestamp from filename
-// ------------------------------
-function extractDateFromFilename(filename) {
-  const match = filename.match(/(\d{14})/); // e.g. 20260402233505
-  if (!match) return null;
+const REGION_KEY = "Région";
+const PRICE_KEY = "Prix Régulier";
+const BANNER_KEY = "Bannière";
+const ADDRESS_KEY = "Adresse";
 
-  const ts = match[1];
-  const year = parseInt(ts.substring(0, 4), 10);
-  const month = parseInt(ts.substring(4, 6), 10) - 1; // 0-based
-  const day = parseInt(ts.substring(6, 8), 10);
-  const hour = parseInt(ts.substring(8, 10), 10);
-  const min = parseInt(ts.substring(10, 12), 10);
-  const sec = parseInt(ts.substring(12, 14), 10);
+async function initDashboard() {
+  const statusLine = document.getElementById("lastUpdated");
+  
+  try {
+    statusLine.textContent = "Loading prices...";
+    
+    // We only fetch gas-prices.xlsx from the root now
+    const cacheBuster = new Date().getTime();
+    const response = await fetch(`gas-prices.xlsx?t=${cacheBuster}`);
+    
+    if (!response.ok) throw new Error("gas-prices.xlsx not found.");
 
-  return new Date(Date.UTC(year, month, day, hour, min, sec));
+    const buf = await response.arrayBuffer();
+    const workbook = XLSX.read(buf, { type: "array" });
+    const firstSheet = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[firstSheet];
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    if (rows.length === 0) {
+      statusLine.textContent = "Data file is empty.";
+      return;
+    }
+
+    processGasData(rows);
+    
+    statusLine.textContent = "Last updated: " + new Date().toLocaleString("en-CA", { 
+      timeZone: "America/Toronto",
+      hour12: true,
+      minute: "2-digit",
+      hour: "numeric"
+    });
+
+  } catch (err) {
+    console.error("Dashboard Error:", err);
+    statusLine.textContent = "Status: Data not yet available.";
+  }
 }
 
-// ------------------------------
-// Main file loader
-// ------------------------------
-async function loadFile() {
-  console.log("Load File triggered!");
-
-  const fileInput = document.getElementById("fileInput");
-  const file = fileInput.files[0];
-
-  if (!file) {
-    alert("Please select an XLSX file first.");
-    return;
-  }
-
-  console.log("File selected:", file.name);
-
-  // Determine timestamp
-  let fileDate = extractDateFromFilename(file.name);
-  if (!fileDate) fileDate = new Date(file.lastModified);
-
-  const montrealTime = fileDate.toLocaleString("en-CA", {
-    timeZone: "America/Toronto",
-    hour12: true,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "numeric",
-    minute: "2-digit"
-  });
-
-  document.getElementById("lastUpdated").textContent =
-    "Data last updated: " + montrealTime;
-
-  // Read XLSX
-  const buf = await file.arrayBuffer();
-  const workbook = XLSX.read(buf, { type: "array" });
-  const firstSheet = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[firstSheet];
-  const rows = XLSX.utils.sheet_to_json(sheet);
-
-  if (rows.length === 0) {
-    alert("No rows found in file.");
-    return;
-  }
-
+function processGasData(rows) {
   const cleaned = rows
-    .filter(row => row["Prix Régulier"])
+    .filter(row => row[PRICE_KEY])
     .map(row => ({
       ...row,
-      regularPrice: parseFloat(row["Prix Régulier"].replace("¢", ""))
-    }));
+      numericPrice: parseFloat(String(row[PRICE_KEY]).replace("¢", "").trim())
+    }))
+    .filter(row => !isNaN(row.numericPrice));
 
-  // Québec average
-  const totalQC = cleaned.reduce((sum, r) => sum + r.regularPrice, 0);
-  const avgQC = totalQC / cleaned.length;
-  document.getElementById("avgQC").textContent = avgQC.toFixed(1) + "¢";
+  const calcAvg = (list) => {
+    if (!list.length) return "—";
+    const sum = list.reduce((acc, r) => acc + r.numericPrice, 0);
+    return (sum / list.length).toFixed(1);
+  };
 
-  // Montréal average
-  const montrealRows = cleaned.filter(r => r["Région"] === "Montréal");
-  const avgMTL =
-    montrealRows.reduce((s, r) => s + r.regularPrice, 0) / montrealRows.length;
-  document.getElementById("avgMTL").textContent = avgMTL.toFixed(1) + "¢";
+  const mtRows = cleaned.filter(r => String(r[REGION_KEY]).includes("Montréal"));
+  const lvRows = cleaned.filter(r => String(r[REGION_KEY]).includes("Laval"));
+  const mrRows = cleaned.filter(r => String(r[REGION_KEY]).includes("Montérégie"));
+  
+  document.getElementById("avgQC").textContent = calcAvg(cleaned) + "¢";
+  document.getElementById("avgMTL").textContent = calcAvg(mtRows) + "¢";
+  document.getElementById("avgLaval").textContent = calcAvg(lvRows) + "¢";
+  document.getElementById("avgMonteregie").textContent = calcAvg(mrRows) + "¢";
 
-  // Laval average
-  const lavalRows = cleaned.filter(r => r["Région"] === "Laval");
-  const avgLaval =
-    lavalRows.reduce((s, r) => s + r.regularPrice, 0) / lavalRows.length;
-  document.getElementById("avgLaval").textContent = avgLaval.toFixed(1) + "¢";
+  const gmaRows = [...mtRows, ...lvRows, ...mrRows];
+  document.getElementById("avgGMA").textContent = calcAvg(gmaRows) + "¢";
 
-  // Montérégie average
-  const monteregieRows = cleaned.filter(r => r["Région"] === "Montérégie");
-  const avgMonteregie =
-    monteregieRows.reduce((s, r) => s + r.regularPrice, 0) /
-    monteregieRows.length;
-  document.getElementById("avgMonteregie").textContent =
-    avgMonteregie.toFixed(1) + "¢";
+  const sortedMTL = [...mtRows].sort((a, b) => a.numericPrice - b.numericPrice);
 
-  // GMA average
-  const gmaRows = cleaned.filter(
-    r =>
-      r["Région"] === "Montréal" ||
-      r["Région"] === "Laval" ||
-      r["Région"] === "Montérégie"
-  );
+  document.getElementById("lowest5").textContent = sortedMTL.slice(0, 5)
+    .map(r => `${r.numericPrice}¢ — ${r[BANNER_KEY] || 'Stn'} — ${r[ADDRESS_KEY] || ''}`).join("\n");
 
-  const avgGMA =
-    gmaRows.reduce((s, r) => s + r.regularPrice, 0) / gmaRows.length;
-  document.getElementById("avgGMA").textContent = avgGMA.toFixed(1) + "¢";
-
-  // Lowest 5 Montréal
-  const sortedMTL = [...montrealRows].sort(
-    (a, b) => a.regularPrice - b.regularPrice
-  );
-
-  const lowest5 = sortedMTL.slice(0, 5);
-  document.getElementById("lowest5").textContent = lowest5
-    .map(r => `${r.regularPrice}¢ — ${r.Bannière} — ${r.Adresse}`)
-    .join("\n");
-
-  // Highest 5 Montréal
-  const highest5 = sortedMTL.slice(-5);
-  document.getElementById("highest5").textContent = highest5
-    .map(r => `${r.regularPrice}¢ — ${r.Bannière} — ${r.Adresse}`)
-    .join("\n");
-
-  console.log("Dashboard updated successfully.");
+  document.getElementById("highest5").textContent = sortedMTL.slice(-5).reverse()
+    .map(r => `${r.numericPrice}¢ — ${r[BANNER_KEY] || 'Stn'} — ${r[ADDRESS_KEY] || ''}`).join("\n");
 }
+
+window.onload = initDashboard;
