@@ -50,17 +50,30 @@ async function loadFile() {
 
   console.log("File selected:", file.name);
 
-  // ------------------------------
-  // Determine timestamp
-  // ------------------------------
-  let fileDate = extractDateFromFilename(file.name);
+// ------------------------------
+// Determine timestamp
+// ------------------------------
+let fileDate = extractDateFromFilename(file.name);
 
-  if (!fileDate) {
-    fileDate = new Date(file.lastModified);
-  }
+if (!fileDate) {
+  fileDate = new Date(file.lastModified);
+}
 
-  document.getElementById("lastUpdated").textContent =
-    "Data last updated: " + fileDate.toLocaleString();
+// Convert to Montreal time (DST handled automatically)
+const montrealTime = fileDate.toLocaleString("en-CA", {
+  timeZone: "America/Toronto",
+  hour12: false,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit"
+});
+
+document.getElementById("lastUpdated").textContent =
+  "Data last updated: " + montrealTime;
+
 
   // ------------------------------
   // Read uploaded XLSX file
