@@ -66,24 +66,6 @@ out.textContent +=
   "\nAverage Montréal: " + (avgMontreal ? avgMontreal.toFixed(1) + "¢" : "N/A");
 
 
-// --- STEP X: 5 lowest and 5 highest Montréal stations ---
-const montrealSorted = [...montrealRows].sort((a, b) => a.regularPrice - b.regularPrice);
-
-const lowest5 = montrealSorted.slice(0, 5);
-const highest5 = montrealSorted.slice(-5);
-
-out.textContent += "\n\nLowest 5 Montréal stations:\n";
-lowest5.forEach(row => {
-  out.textContent += `${row.regularPrice}¢ — ${row.Bannière} — ${row.Adresse}\n`;
-});
-
-out.textContent += "\nHighest 5 Montréal stations:\n";
-highest5.forEach(row => {
-  out.textContent += `${row.regularPrice}¢ — ${row.Bannière} — ${row.Adresse}\n`;
-});
-
-
-
   
 // --- STEP 4: Greater Montréal Area (Montréal + Laval + Montérégie) ---
 const gmaRows = cleaned.filter(row =>
@@ -103,6 +85,23 @@ console.log("Average GMA:", avgGMA);
 out.textContent +=
   "\nAverage Greater Montréal Area: " +
   (avgGMA ? avgGMA.toFixed(1) + "¢" : "N/A");
+
+
+// --- STEP X: 5 lowest and 5 highest Montréal stations ---
+const montrealSorted = [...montrealRows].sort((a, b) => a.regularPrice - b.regularPrice);
+
+const lowest5 = montrealSorted.slice(0, 5);
+const highest5 = montrealSorted.slice(-5);
+
+out.textContent += "\n\nLowest 5 Montréal stations:\n";
+lowest5.forEach(row => {
+  out.textContent += `${row.regularPrice}¢ — ${row.Bannière} — ${row.Adresse}\n`;
+});
+
+out.textContent += "\nHighest 5 Montréal stations:\n";
+highest5.forEach(row => {
+  out.textContent += `${row.regularPrice}¢ — ${row.Bannière} — ${row.Adresse}\n`;
+});
 
   
 };
