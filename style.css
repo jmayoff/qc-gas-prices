@@ -24,10 +24,10 @@ h1 {
     -webkit-text-fill-color: transparent;
 }
 
-/* The 5-card row */
+/* TOP CARDS: Fixed alignment for Montérégie */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 20px;
     max-width: 1200px;
     margin: 0 auto;
@@ -40,17 +40,38 @@ h1 {
     border-radius: 20px;
     box-shadow: var(--shadow);
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 140px; /* Forces all cards to the same height */
 }
 
-.price { font-size: 2.5rem; font-weight: 800; color: var(--primary); }
+.card h2 {
+    font-size: 0.85rem;
+    margin: 0 0 10px 0;
+    color: #64748b;
+    text-transform: uppercase;
+}
 
-/* The 3-card ranking row */
-.ranking-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 24px;
+.price { font-size: 2.2rem; font-weight: 800; color: var(--primary); }
+
+/* RANKING ROWS: Montreal on Row 1, Island on Row 2 */
+.ranking-container {
     max-width: 1200px;
     margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.ranking-row-dual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.ranking-row-full {
+    display: block;
 }
 
 .ranking-card {
@@ -63,17 +84,18 @@ h1 {
 
 pre {
     white-space: pre-wrap;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
     line-height: 1.8;
     color: #cbd5e1;
+    margin: 0;
 }
 
-/* THE FIX: The Upload Box */
+/* Upload Interface */
 .upload-box {
     clear: both;
-    display: block;
     max-width: 450px;
-    margin: 100px auto 50px auto; /* Huge gap to prevent overlap */
+    margin: 80px auto;
     padding: 30px;
     background: white;
     border-radius: 24px;
@@ -92,6 +114,6 @@ button {
     margin-top: 10px;
 }
 
-@media (max-width: 768px) {
-    .ranking-section { grid-template-columns: 1fr; }
+@media (max-width: 900px) {
+    .ranking-row-dual { grid-template-columns: 1fr; }
 }
