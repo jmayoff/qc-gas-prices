@@ -47,8 +47,9 @@ async function initDashboard() {
       minute: "2-digit"
     });
 
-  } catch (err) {
-    statusLine.textContent = "Status: Data unavailable.";
+} catch (err) {
+    console.error("Dashboard Error:", err);
+    statusLine.textContent = "Status: Please upload a stations-YYYYMMDDHHMMSS.xlsx file to begin.";
   }
 }
 
