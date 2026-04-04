@@ -1,7 +1,7 @@
 /**
  * Québec Gas Prices - Dashboard Engine
  * Location: js/app.js
- * Feature: Accent-Insensitive Search + Manual Dorval Pin
+ * Feature: Address-Specific Manual Pinning (Dorval Petro-Canada)
  */
 
 async function initDashboard() {
@@ -76,24 +76,29 @@ function processGasData(rows) {
     document.getElementById("highest5").textContent = sortedMtl.slice(-5).reverse().map(r => `${r.numPrice}¢ • ${r[BANNER] || 'Stn'} • ${r[ADDRESS]}`).join("\n");
 
     /**
-     * LOCAL ISLAND FILTER + MANUAL PIN
-     * Includes Pincourt, Perrot, NDIP, and the specific Dorval Petro-Canada.
+     * UPDATED LOCAL FILTER (The Dorval Pin)
+     * We use a specific address string to ensure we get the right Petro-Canada.
      */
     const localKeywords = ["pincourt", "perrot", "ndip"];
-    const pinnedStationID = "9397-0358"; // Unique string for the Dorval Petro-Canada
+    const pinnedAddress = "995 Montreal-Toronto"; // Unique identifier for Dorval station
     
     let localStations = clean.filter(r => {
+        // Normalize the address in the row for comparison
         const addr = String(r[ADDRESS] || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-        const banner = String(r[BANNER] || "").toLowerCase();
         
-        // Match if it's in our core towns OR if it's the specific Dorval station
-        return localKeywords.some(key => addr.includes(key)) || banner.includes(pinnedStationID.toLowerCase());
+        const isLocalTown = localKeywords.some(key => addr.includes(key));
+        const isPinnedStation = addr.includes(pinnedAddress.toLowerCase());
+        
+        return isLocalTown || isPinnedStation;
     });
 
-    // Custom Sort: Pinned station always first, then others by price
+    // Custom Sort: Ensure Dorval is ALWAYS at the very top
     localStations.sort((a, b) => {
-        const aPinned = String(a[BANNER] || "").includes(pinnedStationID);
-        const bPinned = String(b[BANNER] || "").includes(pinnedStationID);
+        const aAddr = String(a[ADDRESS] || "").toLowerCase();
+        const bAddr = String(b[ADDRESS] || "").toLowerCase();
+        
+        const aPinned = aAddr.includes(pinnedAddress.toLowerCase());
+        const bPinned = bAddr.includes(pinnedAddress.toLowerCase());
         
         if (aPinned) return -1;
         if (bPinned) return 1;
