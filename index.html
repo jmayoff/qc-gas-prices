@@ -1,47 +1,78 @@
-<header>
-    <h1>Québec Gas Prices</h1>
-    <div id="lastUpdated">Loading timestamp...</div>
-</header>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Québec Gas Prices Dashboard</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
 
-<main class="dashboard-grid">
-    <div class="card">
-        <h2>Québec Avg</h2>
-        <div class="price" id="avgQC">--</div>
-    </div>
-    <div class="card">
-        <h2>Montréal Avg</h2>
-        <div class="price" id="avgMTL">--</div>
-    </div>
-    <div class="card">
-        <h2>Laval Avg</h2>
-        <div class="price" id="avgLaval">--</div>
-    </div>
-    <div class="card">
-        <h2>Montérégie Avg</h2>
-        <div class="price" id="avgMonteregie">--</div>
-    </div>
-    <div class="card">
-        <h2>GMA Avg</h2>
-        <div class="price" id="avgGMA">--</div>
-    </div>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
 
-    <div class="ranking-section">
-        <div class="ranking-card">
-            <h3>Lowest 5 Montréal</h3>
-            <pre id="lowest5"></pre>
+    <header>
+        <h1>Québec Gas Prices</h1>
+        <div id="lastUpdated">Initializing dashboard...</div>
+    </header>
+
+    <main class="dashboard-grid">
+        <div class="card">
+            <h2>Québec Avg</h2>
+            <div class="price" id="avgQC">--</div>
         </div>
-        <div class="ranking-card">
-            <h3>Highest 5 Montréal</h3>
-            <pre id="highest5"></pre>
-        </div>
-    </div>
-</main>
 
-<section class="upload-box">
-    <form id="uploadForm">
-        <input type="file" id="fileInput" accept=".xlsx">
-        <br>
-        <button type="submit">Upload New Data</button>
-    </form>
-    <div id="status"></div>
-</section>
+        <div class="card">
+            <h2>Montréal Avg</h2>
+            <div class="price" id="avgMTL">--</div>
+        </div>
+
+        <div class="card">
+            <h2>Laval Avg</h2>
+            <div class="price" id="avgLaval">--</div>
+        </div>
+
+        <div class="card">
+            <h2>Montérégie Avg</h2>
+            <div class="price" id="avgMonteregie">--</div>
+        </div>
+
+        <div class="card">
+            <h2>GMA Avg</h2>
+            <div class="price" id="avgGMA">--</div>
+        </div>
+
+        <div class="ranking-section">
+            <div class="ranking-card">
+                <h3>Lowest 5 Montréal</h3>
+                <pre id="lowest5">Waiting for data...</pre>
+            </div>
+            <div class="ranking-card">
+                <h3>Highest 5 Montréal</h3>
+                <pre id="highest5">Waiting for data...</pre>
+            </div>
+        </div>
+    </main>
+
+    <section class="upload-box">
+        <h3>Update Dashboard</h3>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">
+            Upload your stations-YYYYMMDDHHMMSS.xlsx file below.
+        </p>
+        <form id="uploadForm">
+            <input type="file" id="fileInput" accept=".xlsx">
+            <br><br>
+            <button type="submit">Upload New Data</button>
+        </form>
+        <div id="status" style="margin-top: 15px; font-size: 0.9rem;"></div>
+    </section>
+
+    <script src="upload.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
