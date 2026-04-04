@@ -1,135 +1,96 @@
-/**
- * Québec Gas Prices - Dashboard Logic
- * Version: 3.0 (Modern UI + External Timestamp)
- */
-
-console.log("Dashboard Engine: Initialized");
-
-// Configuration: Matches the headers in the Régie Excel files
-const REGION_KEY = "Région";
-const PRICE_KEY = "Prix Régulier";
-const BANNER_KEY = "Bannière";
-const ADDRESS_KEY = "Adresse";
+console.log("Checking for gas data with Local Area filter...");
 
 async function initDashboard() {
-  const statusLine = document.getElementById("lastUpdated");
-  const cb = new Date().getTime(); // Cache-buster to ensure fresh data
+    const statusLine = document.getElementById("lastUpdated");
+    const cb = new Date().getTime();
 
-  try {
-    statusLine.textContent = "Updating dashboard...";
-
-    // 1. Fetch Timestamp from last-updated.txt
-    let displayDate = null;
     try {
-      const txtRes = await fetch(`last-updated.txt?t=${cb}`);
-      if (txtRes.ok) {
-        const rawContent = await txtRes.text();
-        const match = rawContent.match(/(\d{14})/); // Looks for YYYYMMDDHHMMSS
-        if (match) {
-          const ts = match[1];
-          displayDate = new Date(Date.UTC(
-            ts.substring(0, 4),
-            parseInt(ts.substring(4, 6)) - 1, // Months are 0-indexed in JS
-            ts.substring(6, 8),
-            ts.substring(8, 10),
-            ts.substring(10, 12),
-            ts.substring(12, 14)
-          ));
+        // 1. Timestamp logic
+        try {
+            const txtRes = await fetch(`last-updated.txt?t=${cb}`);
+            if (txtRes.ok) {
+                const filename = await txtRes.text();
+                const match = filename.match(/(\d{14})/);
+                if (match) {
+                    const ts = match[1];
+                    const d = new Date(Date.UTC(ts.substring(0,4), parseInt(ts.substring(4,6))-1, ts.substring(6,8), ts.substring(8,10), ts.substring(10,12), ts.substring(12,14)));
+                    statusLine.textContent = "Data last updated: " + d.toLocaleString("en-CA", { timeZone: "America/Toronto", hour12: true, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+                }
+            }
+        } catch (e) { console.log("Timestamp file skipped."); }
+
+        // 2. Fetch the Excel file
+        const res = await fetch(`gas-prices.xlsx?t=${cb}`);
+        if (!res.ok) {
+            statusLine.textContent = "Error: gas-prices.xlsx not found.";
+            return;
         }
-      }
-    } catch (e) {
-      console.warn("Timestamp record not found. Falling back to file headers.");
+
+        const buf = await res.arrayBuffer();
+        const workbook = XLSX.read(buf, { type: "array" });
+        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+        
+        if (rows.length > 0) {
+            processGasData(rows);
+        } else {
+            statusLine.textContent = "Error: Excel file is empty.";
+        }
+
+    } catch (err) {
+        console.error("Master Error:", err);
+        statusLine.textContent = "Status: Connection Error.";
     }
-
-    // 2. Fetch the Excel Data
-    const res = await fetch(`gas-prices.xlsx?t=${cb}`);
-    if (!res.ok) throw new Error("Data file (gas-prices.xlsx) not found. Please upload a file.");
-    
-    const buf = await res.arrayBuffer();
-    const workbook = XLSX.read(buf, { type: "array" });
-    const sheetName = workbook.SheetNames[0];
-    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-    
-    if (!rows || rows.length === 0) throw new Error("The uploaded Excel file appears to be empty.");
-
-    // 3. Process the Data
-    processGasData(rows);
-
-    // 4. Final UI Update (Timestamp)
-    if (displayDate) {
-      statusLine.textContent = "Data last updated: " + displayDate.toLocaleString("en-CA", {
-        timeZone: "America/Toronto",
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true
-      });
-    } else {
-      statusLine.textContent = "Live Data Loaded";
-    }
-
-  } catch (err) {
-    console.error("Critical Dashboard Error:", err);
-    statusLine.textContent = "Status: " + err.message;
-  }
 }
 
-/**
- * Handles all math and regional filtering
- */
 function processGasData(rows) {
-  // Clean and parse prices
-  const cleaned = rows
-    .filter(row => row[PRICE_KEY])
-    .map(row => {
-      // Strips '¢' and spaces, then converts to number
-      let rawPrice = String(row[PRICE_KEY]).replace("¢", "").trim();
-      return {
-        ...row,
-        numericPrice: parseFloat(rawPrice)
-      };
-    })
-    .filter(row => !isNaN(row.numericPrice));
+    const REGION = "Région";
+    const PRICE = "Prix Régulier";
+    const BANNER = "Bannière";
+    const ADDRESS = "Adresse";
 
-  // Average Calculation Helper
-  const calcAvg = (list) => {
-    if (!list.length) return "—";
-    const sum = list.reduce((acc, r) => acc + r.numericPrice, 0);
-    return (sum / list.length).toFixed(1);
-  };
+    const clean = rows.map(r => ({
+        ...r,
+        numPrice: parseFloat(String(r[PRICE] || "0").replace("¢", "").trim())
+    })).filter(r => r.numPrice > 0);
 
-  // Regional Filtering
-  const mtRows = cleaned.filter(r => String(r[REGION_KEY]).includes("Montréal"));
-  const lvRows = cleaned.filter(r => String(r[REGION_KEY]).includes("Laval"));
-  const mrRows = cleaned.filter(r => String(r[REGION_KEY]).includes("Montérégie"));
-  
-  // Update Individual Cards
-  document.getElementById("avgQC").textContent = calcAvg(cleaned) + "¢";
-  document.getElementById("avgMTL").textContent = calcAvg(mtRows) + "¢";
-  document.getElementById("avgLaval").textContent = calcAvg(lvRows) + "¢";
-  document.getElementById("avgMonteregie").textContent = calcAvg(mrRows) + "¢";
+    const avg = (list) => {
+        if (!list.length) return "—";
+        return (list.reduce((acc, r) => acc + r.numPrice, 0) / list.length).toFixed(1) + "¢";
+    };
 
-  // GMA Average (Montréal + Laval + Montérégie)
-  const gmaRows = [...mtRows, ...lvRows, ...mrRows];
-  document.getElementById("avgGMA").textContent = calcAvg(gmaRows) + "¢";
+    const mtl = clean.filter(r => String(r[REGION]).includes("Montréal"));
+    const lav = clean.filter(r => String(r[REGION]).includes("Laval"));
+    const mon = clean.filter(r => String(r[REGION]).includes("Montérégie"));
 
-  // Sort by price for Rankings (Montréal specific)
-  const sortedMTL = [...mtRows].sort((a, b) => a.numericPrice - b.numericPrice);
+    // Update Global/Regional Averages
+    document.getElementById("avgQC").textContent = avg(clean);
+    document.getElementById("avgMTL").textContent = avg(mtl);
+    document.getElementById("avgLaval").textContent = avg(lav);
+    document.getElementById("avgMonteregie").textContent = avg(mon);
+    document.getElementById("avgGMA").textContent = avg([...mtl, ...lav, ...mon]);
 
-  // Update Lowest 5 (Best Prices)
-  document.getElementById("lowest5").textContent = sortedMTL.slice(0, 5)
-    .map(r => `${r.numericPrice}¢  •  ${r[BANNER_KEY] || 'Stn'}  •  ${r[ADDRESS_KEY] || 'No Address'}`)
-    .join("\n");
+    // Montréal Rankings
+    const sortedMtl = [...mtl].sort((a, b) => a.numPrice - b.numPrice);
+    document.getElementById("lowest5").textContent = sortedMtl.slice(0, 5).map(r => `${r.numPrice}¢ • ${r[BANNER]} • ${r[ADDRESS]}`).join("\n");
+    document.getElementById("highest5").textContent = sortedMtl.slice(-5).reverse().map(r => `${r.numPrice}¢ • ${r[BANNER]} • ${r[ADDRESS]}`).join("\n");
 
-  // Update Highest 5 (Worst Prices)
-  document.getElementById("highest5").textContent = sortedMTL.slice(-5).reverse()
-    .map(r => `${r.numericPrice}¢  •  ${r[BANNER_KEY] || 'Stn'}  •  ${r[ADDRESS_KEY] || 'No Address'}`)
-    .join("\n");
+    /** * NEW: LOCAL AREA FILTER
+     * Searches the address field for our specific local towns
+     */
+    const localKeywords = ["Pincourt", "L'Ile-Perrot", "Notre-Dame-de-l'Ile-Perrot"];
+    const localStations = clean.filter(r => {
+        const addr = String(r[ADDRESS] || "").toLowerCase();
+        return localKeywords.some(keyword => addr.includes(keyword.toLowerCase()));
+    }).sort((a, b) => a.numPrice - b.numPrice);
 
-  console.log(`Processed ${cleaned.length} stations successfully.`);
+    const localDisplay = document.getElementById("localStations");
+    if (localStations.length > 0) {
+        localDisplay.textContent = localStations.map(r => 
+            `${r.numPrice}¢  •  ${r[BANNER] || 'Stn'}  •  ${r[ADDRESS]}`
+        ).join("\n");
+    } else {
+        localDisplay.textContent = "No stations found for the local area in this dataset.";
+    }
 }
 
-// Kick off the dashboard
 window.onload = initDashboard;
