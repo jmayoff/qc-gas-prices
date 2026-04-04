@@ -1,56 +1,114 @@
+/* General Reset */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+    line-height: 1.5;
+}
+
+/* Header Styling */
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
 h1 {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 2.2rem;
-  font-weight: 600;
-  color: #333;
-}
-.timestamp {
-  text-align: center;
-  color: #666;
-  margin-top: -10px;
-  margin-bottom: 20px;
-  font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: #2c3e50;
 }
 
-.dashboard {
-  max-width: 800px;
-  margin: 40px auto;
-  font-family: system-ui, sans-serif;
-  color: #222;
+#lastUpdated {
+    font-size: 0.9rem;
+    color: #7f8c8d;
 }
 
-.cards {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
+/* The Grid Container */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
+/* Card Styling */
 .card {
-  flex: 1;
-  background: #f7f7f7;
-  padding: 15px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-align: center;
 }
 
-.card h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #444;
+.card h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: #34495e;
 }
 
-.card p {
-  font-size: 1.8rem;
-  font-weight: bold;
-  margin: 10px 0 0;
+.price {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #e67e22; /* Gas price orange */
+    margin: 10px 0;
+}
+
+/* Ranking Lists (Lowest/Highest) */
+.list-container {
+    grid-column: 1 / -1; /* Makes lists span full width */
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
 }
 
 pre {
-  background: #fafafa;
-  padding: 12px;
-  border-radius: 8px;
-  white-space: pre-wrap;
-  font-size: 0.95rem;
+    white-space: pre-wrap; /* Wraps text on small screens */
+    word-wrap: break-word;
+    font-family: inherit;
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+/* Upload Section */
+.upload-section {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #ecf0f1;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* MOBILE OPTIMIZATIONS */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .price {
+        font-size: 2rem;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Force single column on phones */
+    }
+    
+    pre {
+        font-size: 0.8rem; /* Smaller text for long addresses */
+    }
 }
