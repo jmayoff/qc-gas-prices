@@ -2,81 +2,54 @@ console.log("app.js loaded");
 
 const REGION_KEY = "Région";
 const PRICE_KEY = "Prix Régulier";
-const BANNER_KEY = "Bannière";
-const ADDRESS_KEY = "Adresse";
 
 async function initDashboard() {
   const statusLine = document.getElementById("lastUpdated");
-  
+  const cb = new Date().getTime();
+
   try {
-    statusLine.textContent = "Loading prices...";
-    
-    // We only fetch gas-prices.xlsx from the root now
-    const cacheBuster = new Date().getTime();
-    const response = await fetch(`gas-prices.xlsx?t=${cacheBuster}`);
-    
-    if (!response.ok) throw new Error("gas-prices.xlsx not found.");
+    // 1. Get the timestamp from the text file
+    const txtRes = await fetch(`last-updated.txt?t=${cb}`);
+    let displayDate = new Date();
 
-    const buf = await response.arrayBuffer();
-    const workbook = XLSX.read(buf, { type: "array" });
-    const firstSheet = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[firstSheet];
-    const rows = XLSX.utils.sheet_to_json(sheet);
-
-    if (rows.length === 0) {
-      statusLine.textContent = "Data file is empty.";
-      return;
+    if (txtRes.ok) {
+      const filename = await txtRes.text();
+      const match = filename.match(/(\d{14})/);
+      if (match) {
+        const ts = match[1];
+        displayDate = new Date(Date.UTC(
+          ts.substring(0, 4),
+          parseInt(ts.substring(4, 6)) - 1,
+          ts.substring(6, 8),
+          ts.substring(8, 10),
+          ts.substring(10, 12),
+          ts.substring(12, 14)
+        ));
+      }
     }
 
-    processGasData(rows);
+    // 2. Get and Process Excel
+    const res = await fetch(`gas-prices.xlsx?t=${cb}`);
+    if (!res.ok) throw new Error("File not found");
     
-    statusLine.textContent = "Last updated: " + new Date().toLocaleString("en-CA", { 
+    const buf = await res.arrayBuffer();
+    const workbook = XLSX.read(buf, { type: "array" });
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+    
+    processGasData(rows);
+
+    statusLine.textContent = "Data last updated: " + displayDate.toLocaleString("en-CA", {
       timeZone: "America/Toronto",
-      hour12: true,
-      minute: "2-digit",
-      hour: "numeric"
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
     });
 
   } catch (err) {
-    console.error("Dashboard Error:", err);
-    statusLine.textContent = "Status: Data not yet available.";
+    statusLine.textContent = "Status: Data unavailable.";
   }
 }
 
-function processGasData(rows) {
-  const cleaned = rows
-    .filter(row => row[PRICE_KEY])
-    .map(row => ({
-      ...row,
-      numericPrice: parseFloat(String(row[PRICE_KEY]).replace("¢", "").trim())
-    }))
-    .filter(row => !isNaN(row.numericPrice));
-
-  const calcAvg = (list) => {
-    if (!list.length) return "—";
-    const sum = list.reduce((acc, r) => acc + r.numericPrice, 0);
-    return (sum / list.length).toFixed(1);
-  };
-
-  const mtRows = cleaned.filter(r => String(r[REGION_KEY]).includes("Montréal"));
-  const lvRows = cleaned.filter(r => String(r[REGION_KEY]).includes("Laval"));
-  const mrRows = cleaned.filter(r => String(r[REGION_KEY]).includes("Montérégie"));
-  
-  document.getElementById("avgQC").textContent = calcAvg(cleaned) + "¢";
-  document.getElementById("avgMTL").textContent = calcAvg(mtRows) + "¢";
-  document.getElementById("avgLaval").textContent = calcAvg(lvRows) + "¢";
-  document.getElementById("avgMonteregie").textContent = calcAvg(mrRows) + "¢";
-
-  const gmaRows = [...mtRows, ...lvRows, ...mrRows];
-  document.getElementById("avgGMA").textContent = calcAvg(gmaRows) + "¢";
-
-  const sortedMTL = [...mtRows].sort((a, b) => a.numericPrice - b.numericPrice);
-
-  document.getElementById("lowest5").textContent = sortedMTL.slice(0, 5)
-    .map(r => `${r.numericPrice}¢ — ${r[BANNER_KEY] || 'Stn'} — ${r[ADDRESS_KEY] || ''}`).join("\n");
-
-  document.getElementById("highest5").textContent = sortedMTL.slice(-5).reverse()
-    .map(r => `${r.numericPrice}¢ — ${r[BANNER_KEY] || 'Stn'} — ${r[ADDRESS_KEY] || ''}`).join("\n");
-}
-
-window.onload = initDashboard;
+// ... include your processGasData function from before ...
