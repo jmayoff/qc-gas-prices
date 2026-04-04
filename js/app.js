@@ -1,7 +1,7 @@
 /**
  * Québec Gas Prices - Dashboard Engine
  * Location: js/app.js
- * Feature: Address-Specific Manual Pinning (Dorval Petro-Canada)
+ * Feature: Postal Code Manual Pinning (Dorval Petro-Canada)
  */
 
 async function initDashboard() {
@@ -50,6 +50,7 @@ function processGasData(rows) {
     const PRICE = getCol(['prix régulier', 'prix regulier', 'prix']);
     const BANNER = getCol(['bannière', 'banniere', 'banner']);
     const ADDRESS = getCol(['adresse', 'address']);
+    const POSTAL = getCol(['code postal', 'codepostal', 'postal code']);
 
     const clean = rows.map(r => ({
         ...r,
@@ -76,32 +77,31 @@ function processGasData(rows) {
     document.getElementById("highest5").textContent = sortedMtl.slice(-5).reverse().map(r => `${r.numPrice}¢ • ${r[BANNER] || 'Stn'} • ${r[ADDRESS]}`).join("\n");
 
     /**
-     * UPDATED LOCAL FILTER (The Dorval Pin)
-     * We use a specific address string to ensure we get the right Petro-Canada.
+     * LOCAL FILTER - POSTAL CODE PIN
+     * We use the exact postal code H9S 1A2 to identify the Dorval Petro-Canada.
      */
     const localKeywords = ["pincourt", "perrot", "ndip"];
-    const pinnedAddress = "995 Montreal-Toronto"; // Unique identifier for Dorval station
+    const pinnedPC = "H9S 1A2"; 
     
     let localStations = clean.filter(r => {
-        // Normalize the address in the row for comparison
         const addr = String(r[ADDRESS] || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-        
+        const post = String(r[POSTAL] || "").toUpperCase().replace(/\s/g, ""); // Clean the data PC
+        const targetPC = pinnedPC.toUpperCase().replace(/\s/g, ""); // Clean our target PC
+
         const isLocalTown = localKeywords.some(key => addr.includes(key));
-        const isPinnedStation = addr.includes(pinnedAddress.toLowerCase());
+        const isPinnedStation = post === targetPC;
         
         return isLocalTown || isPinnedStation;
     });
 
-    // Custom Sort: Ensure Dorval is ALWAYS at the very top
+    // Custom Sort: Pinned Postal Code always first, others by price
     localStations.sort((a, b) => {
-        const aAddr = String(a[ADDRESS] || "").toLowerCase();
-        const bAddr = String(b[ADDRESS] || "").toLowerCase();
-        
-        const aPinned = aAddr.includes(pinnedAddress.toLowerCase());
-        const bPinned = bAddr.includes(pinnedAddress.toLowerCase());
-        
-        if (aPinned) return -1;
-        if (bPinned) return 1;
+        const postA = String(a[POSTAL] || "").toUpperCase().replace(/\s/g, "");
+        const postB = String(b[POSTAL] || "").toUpperCase().replace(/\s/g, "");
+        const targetPC = pinnedPC.toUpperCase().replace(/\s/g, "");
+
+        if (postA === targetPC) return -1;
+        if (postB === targetPC) return 1;
         return a.numPrice - b.numPrice;
     });
 
