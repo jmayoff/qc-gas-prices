@@ -1,6 +1,7 @@
 /**
  * Québec Gas Prices - Dashboard Engine
  * Location: js/app.js
+ * Feature: Accent-Insensitive Search + Manual Dorval Pin
  */
 
 async function initDashboard() {
@@ -8,6 +9,7 @@ async function initDashboard() {
     const cb = new Date().getTime();
 
     try {
+        // 1. Fetch Timestamp
         try {
             const txtRes = await fetch(`last-updated.txt?t=${cb}`);
             if (txtRes.ok) {
@@ -21,6 +23,7 @@ async function initDashboard() {
             }
         } catch (e) { console.log("Timestamp skipped."); }
 
+        // 2. Fetch Gas Data Excel File
         const res = await fetch(`gas-prices.xlsx?t=${cb}`);
         if (!res.ok) {
             statusLine.textContent = "Error: gas-prices.xlsx not found.";
@@ -72,15 +75,39 @@ function processGasData(rows) {
     document.getElementById("lowest5").textContent = sortedMtl.slice(0, 5).map(r => `${r.numPrice}¢ • ${r[BANNER] || 'Stn'} • ${r[ADDRESS]}`).join("\n");
     document.getElementById("highest5").textContent = sortedMtl.slice(-5).reverse().map(r => `${r.numPrice}¢ • ${r[BANNER] || 'Stn'} • ${r[ADDRESS]}`).join("\n");
 
+    /**
+     * LOCAL ISLAND FILTER + MANUAL PIN
+     * Includes Pincourt, Perrot, NDIP, and the specific Dorval Petro-Canada.
+     */
     const localKeywords = ["pincourt", "perrot", "ndip"];
-    const localStations = clean.filter(r => {
+    const pinnedStationID = "9397-0358"; // Unique string for the Dorval Petro-Canada
+    
+    let localStations = clean.filter(r => {
         const addr = String(r[ADDRESS] || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-        return localKeywords.some(key => addr.includes(key));
-    }).sort((a, b) => a.numPrice - b.numPrice);
+        const banner = String(r[BANNER] || "").toLowerCase();
+        
+        // Match if it's in our core towns OR if it's the specific Dorval station
+        return localKeywords.some(key => addr.includes(key)) || banner.includes(pinnedStationID.toLowerCase());
+    });
 
-    document.getElementById("localStations").textContent = localStations.length > 0 
-        ? localStations.map(r => `${r.numPrice}¢ • ${r[BANNER] || 'Stn'} • ${r[ADDRESS]}`).join("\n")
-        : "No local island stations found.";
+    // Custom Sort: Pinned station always first, then others by price
+    localStations.sort((a, b) => {
+        const aPinned = String(a[BANNER] || "").includes(pinnedStationID);
+        const bPinned = String(b[BANNER] || "").includes(pinnedStationID);
+        
+        if (aPinned) return -1;
+        if (bPinned) return 1;
+        return a.numPrice - b.numPrice;
+    });
+
+    const localDisplay = document.getElementById("localStations");
+    if (localStations.length > 0) {
+        localDisplay.textContent = localStations.map(r => 
+            `${r.numPrice}¢ • ${r[BANNER] || 'Stn'} • ${r[ADDRESS]}`
+        ).join("\n");
+    } else {
+        localDisplay.textContent = "No local island stations found.";
+    }
 }
 
 window.onload = initDashboard;
