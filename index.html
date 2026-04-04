@@ -18,42 +18,44 @@
     </header>
 
     <main class="dashboard-grid">
-        <div class="card">
-            <h2>Québec Avg</h2>
-            <div class="price" id="avgQC">--</div>
-        </div>
-        <div class="card">
-            <h2>Montréal Avg</h2>
-            <div class="price" id="avgMTL">--</div>
-        </div>
-        <div class="card">
-            <h2>Laval Avg</h2>
-            <div class="price" id="avgLaval">--</div>
-        </div>
-        <div class="card">
-            <h2>Montérégie Avg</h2>
-            <div class="price" id="avgMonteregie">--</div>
-        </div>
-        <div class="card">
-            <h2>GMA Avg</h2>
-            <div class="price" id="avgGMA">--</div>
-        </div>
+        <div class="card"><h2>Québec Avg</h2><div class="price" id="avgQC">--</div></div>
+        <div class="card"><h2>Montréal Avg</h2><div class="price" id="avgMTL">--</div></div>
+        <div class="card"><h2>Laval Avg</h2><div class="price" id="avgLaval">--</div></div>
+        <div class="card"><h2>Montérégie Avg</h2><div class="price" id="avgMonteregie">--</div></div>
+        <div class="card"><h2>GMA Avg</h2><div class="price" id="avgGMA">--</div></div>
     </main>
 
-    <div class="ranking-section">
-        <div class="ranking-card">
-            <h3>Least expensive in Montreal</h3>
-            <pre id="lowest5"></pre>
+    <div class="ranking-container">
+        <div class="ranking-row-dual">
+            <div class="ranking-card">
+                <h3>Least expensive in Montreal</h3>
+                <pre id="lowest5"></pre>
+            </div>
+            <div class="ranking-card">
+                <h3>Most expensive in Montreal</h3>
+                <pre id="highest5"></pre>
+            </div>
         </div>
-        <div class="ranking-card">
-            <h3>Most expensive in Montreal</h3>
-            <pre id="highest5"></pre>
-        </div>
-        <div class="ranking-card">
-            <h3>📍 Local Island Prices</h3>
-            <pre id="localStations"></pre>
+
+        <div class="ranking-row-full">
+            <div class="ranking-card">
+                <h3>📍 Local Island Prices (NDIP / L'Île-Perrot / Pincourt)</h3>
+                <pre id="localStations"></pre>
+            </div>
         </div>
     </div>
+
+    <section class="upload-box">
+        <h3>Update Dashboard</h3>
+        <form id="uploadForm">
+            <input type="file" id="fileInput" accept=".xlsx">
+            <button type="submit">Upload New Data</button>
+        </form>
+        <div id="status"></div>
+    </section>
+
+    <script src="js/upload.js"></script>
+    <script src="js/app.js"></script>
 
     <section class="upload-box">
         <h3>Update Dashboard</h3>
