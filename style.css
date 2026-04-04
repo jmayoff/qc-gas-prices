@@ -1,87 +1,50 @@
-/* 1. Global Variables & Modern Fonts */
 :root {
-    --primary: #2563eb;       /* Modern Blue */
-    --accent: #f97316;        /* Gas Orange */
+    --primary: #2563eb;
     --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     --card-bg: rgba(255, 255, 255, 0.85);
-    --dark-card: #1e293b;     /* Slate Blue for rankings */
-    --text-main: #1e293b;
-    --text-muted: #64748b;
+    --dark-card: #1e293b;
     --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 body {
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: 'Inter', sans-serif;
     background: var(--bg-gradient);
-    min-height: 100vh;
     margin: 0;
     padding: 20px;
-    color: var(--text-main);
-    line-height: 1.6;
+    color: #1e293b;
 }
 
-/* 2. Header & Timestamp */
-header {
-    text-align: center;
-    padding: 40px 0 20px 0;
-}
+header { text-align: center; padding: 40px 0; }
 
 h1 {
     font-size: 2.5rem;
     font-weight: 800;
-    letter-spacing: -0.025em;
-    margin: 0;
     background: linear-gradient(to right, #1e40af, #2563eb);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-#lastUpdated {
-    margin-top: 10px;
-    font-weight: 500;
-    color: var(--text-muted);
-}
-
-/* 3. Main Dashboard Grid (The 5 Avg Cards) */
+/* The 5-card row */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
     max-width: 1200px;
     margin: 0 auto;
 }
 
-/* Glassmorphism Cards */
 .card {
     background: var(--card-bg);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
     padding: 24px;
     border-radius: 20px;
     box-shadow: var(--shadow);
     text-align: center;
-    transition: transform 0.2s ease;
 }
 
-.card:hover {
-    transform: translateY(-5px);
-}
+.price { font-size: 2.5rem; font-weight: 800; color: var(--primary); }
 
-.card h2 {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    margin: 0 0 10px 0;
-}
-
-.price {
-    font-size: 2.8rem;
-    font-weight: 800;
-    color: var(--primary);
-}
-
-/* 4. Ranking Section (The 3 Dark Cards) */
+/* The 3-card ranking row */
 .ranking-section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -96,66 +59,39 @@ h1 {
     padding: 24px;
     border-radius: 20px;
     box-shadow: var(--shadow);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.ranking-card h3 {
-    margin-top: 0;
-    color: #94a3b8;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid #334155;
-    padding-bottom: 12px;
-    margin-bottom: 15px;
 }
 
 pre {
     white-space: pre-wrap;
-    word-break: break-word;
-    font-family: 'JetBrains Mono', monospace;
     font-size: 0.85rem;
     line-height: 1.8;
     color: #cbd5e1;
-    margin: 0;
 }
 
-/* 5. Upload UI */
+/* THE FIX: The Upload Box */
 .upload-box {
-    max-width: 500px;
-    margin: 60px auto;
-    padding: 40px;
+    clear: both;
+    display: block;
+    max-width: 450px;
+    margin: 100px auto 50px auto; /* Huge gap to prevent overlap */
+    padding: 30px;
     background: white;
     border-radius: 24px;
     box-shadow: var(--shadow);
     text-align: center;
 }
 
-.upload-box h3 { margin-top: 0; }
-
 button {
     background: var(--primary);
     color: white;
     border: none;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 10px;
     cursor: pointer;
     width: 100%;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
-button:hover {
-    background: #1d4ed8;
-}
-
-/* 6. Responsive Mobile Fixes */
 @media (max-width: 768px) {
-    h1 { font-size: 1.8rem; }
-    .price { font-size: 2.2rem; }
-    body { padding: 15px; }
-    
-    .ranking-section {
-        grid-template-columns: 1fr; /* Force stack on phones */
-    }
+    .ranking-section { grid-template-columns: 1fr; }
 }
