@@ -1,50 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Quebec Gas Prices</title>
-  <link rel="stylesheet" href="style.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
+<header>
+    <h1>Québec Gas Prices</h1>
+    <div id="lastUpdated">Loading timestamp...</div>
+</header>
 
-  <h1>Quebec Gas Prices</h1>
-  <p id="lastUpdated" class="timestamp">No data loaded yet</p>
-
-  <!-- File Upload -->
-  <form id="uploadForm">
-  <input type="file" id="fileInput" accept=".xlsx" required />
-  <button type="submit">Upload XLSX</button>
-  </form>
-
-<div id="status"></div>
-
-
-  <!-- Dashboard -->
-  <div class="dashboard">
-    <h2>Québec Fuel Prices</h2>
-
-    <div class="cards">
-      <div class="card"><h3>Québec Avg</h3><p id="avgQC">—</p></div>
-      <div class="card"><h3>Montréal Avg</h3><p id="avgMTL">—</p></div>
-      <div class="card"><h3>GMA Avg</h3><p id="avgGMA">—</p></div>
+<main class="dashboard-grid">
+    <div class="card">
+        <h2>Québec Avg</h2>
+        <div class="price" id="avgQC">--</div>
+    </div>
+    <div class="card">
+        <h2>Montréal Avg</h2>
+        <div class="price" id="avgMTL">--</div>
+    </div>
+    <div class="card">
+        <h2>Laval Avg</h2>
+        <div class="price" id="avgLaval">--</div>
+    </div>
+    <div class="card">
+        <h2>Montérégie Avg</h2>
+        <div class="price" id="avgMonteregie">--</div>
+    </div>
+    <div class="card">
+        <h2>GMA Avg</h2>
+        <div class="price" id="avgGMA">--</div>
     </div>
 
-    <div class="cards">
-      <div class="card"><h3>Laval Avg</h3><p id="avgLaval">—</p></div>
-      <div class="card"><h3>Montérégie Avg</h3><p id="avgMonteregie">—</p></div>
+    <div class="ranking-section">
+        <div class="ranking-card">
+            <h3>Lowest 5 Montréal</h3>
+            <pre id="lowest5"></pre>
+        </div>
+        <div class="ranking-card">
+            <h3>Highest 5 Montréal</h3>
+            <pre id="highest5"></pre>
+        </div>
     </div>
+</main>
 
-    <h3>Lowest 5 in Montréal</h3>
-    <pre id="lowest5"></pre>
-
-    <h3>Highest 5 in Montréal</h3>
-    <pre id="highest5"></pre>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <script src="js/app.js"></script>
-  <script src="upload.js"></script>
-
-</body>
-</html>
+<section class="upload-box">
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept=".xlsx">
+        <br>
+        <button type="submit">Upload New Data</button>
+    </form>
+    <div id="status"></div>
+</section>
