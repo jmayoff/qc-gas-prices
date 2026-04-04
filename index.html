@@ -4,20 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Québec Gas Prices Dashboard</title>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
-
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
     <header>
         <h1>Québec Gas Prices</h1>
-        <div id="lastUpdated">Initializing dashboard...</div>
+        <div id="lastUpdated">Initializing...</div>
     </header>
 
     <main class="dashboard-grid">
@@ -25,57 +22,50 @@
             <h2>Québec Avg</h2>
             <div class="price" id="avgQC">--</div>
         </div>
-
         <div class="card">
             <h2>Montréal Avg</h2>
             <div class="price" id="avgMTL">--</div>
         </div>
-
         <div class="card">
             <h2>Laval Avg</h2>
             <div class="price" id="avgLaval">--</div>
         </div>
-
         <div class="card">
             <h2>Montérégie Avg</h2>
             <div class="price" id="avgMonteregie">--</div>
         </div>
-
         <div class="card">
             <h2>GMA Avg</h2>
             <div class="price" id="avgGMA">--</div>
         </div>
+    </main>
 
-      <div class="ranking-section">
-    <div class="ranking-card">
-        <h3>Least expensive in Montreal</h3>
-        <pre id="lowest5"></pre>
+    <div class="ranking-section">
+        <div class="ranking-card">
+            <h3>Least expensive in Montreal</h3>
+            <pre id="lowest5"></pre>
+        </div>
+        <div class="ranking-card">
+            <h3>Most expensive in Montreal</h3>
+            <pre id="highest5"></pre>
+        </div>
+        <div class="ranking-card">
+            <h3>📍 Local Island Prices</h3>
+            <pre id="localStations"></pre>
+        </div>
     </div>
-    <div class="ranking-card">
-        <h3>Most expensive in Montreal</h3>
-        <pre id="highest5"></pre>
-    </div>
-    <div class="ranking-card">
-        <h3>📍 Local Island Prices</h3>
-        <pre id="localStations"></pre>
-    </div>
-</div>
 
     <section class="upload-box">
         <h3>Update Dashboard</h3>
-        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">
-            Upload your stations-YYYYMMDDHHMMSS.xlsx file below.
-        </p>
+        <p style="font-size: 0.8rem; color: #64748b;">Upload stations-YYYYMMDDHHMMSS.xlsx</p>
         <form id="uploadForm">
             <input type="file" id="fileInput" accept=".xlsx">
-            <br><br>
             <button type="submit">Upload New Data</button>
         </form>
-        <div id="status" style="margin-top: 15px; font-size: 0.9rem;"></div>
+        <div id="status"></div>
     </section>
 
     <script src="upload.js"></script>
-    <script src="js/app.js"></script>
-
+    <script src="app.js"></script>
 </body>
 </html>
